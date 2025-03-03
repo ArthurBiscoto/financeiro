@@ -197,13 +197,18 @@
     
         <div class="content active" id="aba-menu">
             <h2 id="titulo-menu">Bem-vindo ao Controle Financeiro</h2>
+            <div id="campo-nome" style="display: none;">
+                <p>Por favor, insira seu nome:</p>
+                <input type="text" id="nome-usuario" placeholder="Seu nome">
+                <button onclick="salvarNome()">Salvar Nome</button>
+            </div>
             <div id="info-usuario" style="display: none;">
                 <p>Seu saldo atual é:</p>
-                <p class="cx">R$ <span class="value-menu" id="caixa-valor-menu">0.00</span></p>
+                <p class="cx">R$ <span class="cx-value" id="caixa-valor">0.00</span></p>
                 <p>Contas Pendentes: <span id="contas-pendentes">0</span></p>
                 <p>Contas Pagas: <span id="contas-pagas">0</span></p>
                 <p>Investimentos:</p>
-                <p class="invest">R$ <span id="total-investido-menu">0.00</span></p>
+                <p class="invest">R$ <span class="invest-value" id="total-investido">0.00</span></p>
             </div>
         </div>
     
@@ -322,6 +327,14 @@
                 document.getElementById('info-usuario').style.display = 'block';
                 atualizarUI();
             }
+        }
+
+        // Verificar se já tem o nome salvo no localStorage
+        if (nomeUsuario) {
+            document.getElementById('titulo-menu').innerText = `Olá, ${nomeUsuario}`;
+            document.getElementById('info-usuario').style.display = 'block';
+        } else {
+            document.getElementById('campo-nome').style.display = 'block';
         }
     
         // Função para atualizar todas as interfaces
