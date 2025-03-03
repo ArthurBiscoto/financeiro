@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+            border-radius: 7px;
+            margin-top: 30px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        .tab.active {
+            border-bottom: 3px solid blue;
+            font-weight: bold;
+            background-color: #F0F0F0;
+        }
+        .content {
+            display: none;
+            padding: 20px 0;
+        }
+        .content.active {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+        .vencida {
+            color: red;
+        }
+        .pendente {
+            color: orange;
+        }
+        .paga {
+            color: green;
+        }
+        button {
+            padding: 10px;
+            border: solid #12BAA6 1px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .btn-pagar {
+            background-color: green;
+            color: white;
+        }
+        .btn-deletar {
+            background-color: red;
+            color: white;
+        }
+        input {
+            font-size: 15px;
+            border: solid #12BAA6 1.9px;
+            outline: none;
+            padding: 10px;
+        }
+        .caixa {
+            font-size: 25px;
+        }
+        header {
+            text-align: center;
+            padding: 10px;
+            background-color: #12BAA6;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            color: #555;
+            margin-top: 5px;
+        }
+        .confirmacao-exclusao {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .confirmacao-exclusao .modal {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 300px;
+        }
+        .confirmacao-exclusao button {
+            margin-top: 10px;
+            width: 100%;
+            padding: 10px;
+        }
+        .confirmacao-exclusao .btn-confirmar {
+            background-color: green;
+            color: white;
+        }
+        .confirmacao-exclusao .btn-cancelar {
+            background-color: red;
+            color: white;
+        }
+        .campo-nome {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .cx{
+            margin-top: -10px;
+            width: 180px;
+            padding: 15px 15px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .cx-value {
+            font-size: 30px;
+            margin-top: 50px;
+        }
+
+        .invest {
+            margin-top: -10px;
+            width: 180px;
+            padding: 15px 15px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: -10px;
+        }
+
+        .invest-value {
+            font-size: 30px;
+            margin-top: 50px;
+        }
+
+        .datatime {
+            width: 20px;
+            height: 17px;
+        }
+
+        .value {
+            font-size: 30px;
+        }
+
+        .value-menu {
+            font-size: 25px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        Controle Financeiro
+    </header>
+    
+    <div class="container">
+        <div class="tabs">
+            
+            <button class="tab active" onclick="mostrarAba('aba-menu')"><i class="bi bi-house"></i></button>
+            <button class="tab" onclick="mostrarAba('aba-contas')">Contas</button>
+            <button class="tab" onclick="mostrarAba('aba-investimentos')">Investimentos</button>
+            <button class="tab" onclick="mostrarAba('aba-caixa')">Caixa</button>
+            <button class="tab" onclick="mostrarAba('aba-historico')">Histórico</button>
+        </div>
+    
+        <div class="content active" id="aba-menu">
+            <h2 id="titulo-menu">Bem-vindo ao Controle Financeiro</h2>
+            <div id="info-usuario" style="display: none;">
+                <p>Seu saldo atual é:</p>
+                <p class="cx">R$ <span class="value-menu" id="caixa-valor-menu">0.00</span></p>
+                <p>Contas Pendentes: <span id="contas-pendentes">0</span></p>
+                <p>Contas Pagas: <span id="contas-pagas">0</span></p>
+                <p>Investimentos:</p>
+                <p class="invest">R$ <span id="total-investido-menu">0.00</span></p>
+            </div>
+        </div>
+    
+        <div class="content" id="aba-contas">
+            <h2>Gerenciar Contas</h2>
+            <input type="text" id="nome-conta" placeholder="Título da conta">
+            <input type="number" id="valor-conta" placeholder="Valor R$">
+            <input class="datatime" type="date" id="vencimento-conta">
+            <button onclick="adicionarConta()">Adicionar Conta</button>
+    
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Valor</th>
+                        <th>Vencimento</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-contas"></tbody>
+            </table>
+        </div>
+    
+        <div class="content" id="aba-investimentos">
+            <h2>Investimentos</h2>
+            <p>R$ <span class="value" id="total-investido-investimentos">0.00</span></p>
+            <input type="number" id="valor-investir" placeholder="Valor a investir">
+            <button onclick="adicionarInvestimento()">Investir</button>
+            <button onclick="retirarInvestimento()">Resgatar</button>
+        </div>
+    
+        <div class="content" id="aba-caixa">
+            <h2>Saldo</h2>
+            <p>R$ <span class="value" id="caixa-valor-caixa">0.00</span></p>
+            <button onclick="exibirTelaAdicionar()">Adicionar fundos</button>
+            <button onclick="exibirTelaRetirar()">Retirar fundos</button>
+        </div>
+        
+        <!-- Modal Adicionar Fundos -->
+        <div id="modal-adicionar-fundos" style="display:none;">
+            <div class="modal-content">
+                <input type="number" id="valor-adicionar" placeholder="Valor a adicionar">
+                <button onclick="adicionarFundos()">Adicionar</button>
+                <button onclick="fecharModal()">Cancelar</button>
+            </div>
+        </div>
+        
+        <!-- Modal Retirar Fundos -->
+        <div id="modal-retirar-fundos" style="display:none;">
+            <div class="modal-content">
+                <input type="number" id="valor-retirar" placeholder="Valor a retirar">
+                <button onclick="retirarFundos()">Retirar</button>
+                <button onclick="fecharModal()">Cancelar</button>
+            </div>
+        </div>
+    
+        <div class="content" id="aba-historico">
+            <h2>Histórico de Movimentações</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Movimentação</th>
+                        <th>Valor</th>
+                        <th>Caixa Após</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-historico"></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <footer>
+        &copy; 2025 Traddy Tecnologia. Todos os direitos reservados.
+    </footer>
+    
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="modal-exclusao" style="display: none;">
+        <div class="modal-content">
+            <p>Tem certeza que deseja excluir essa conta?</p>
+            <button onclick="confirmarExclusao()">Sim</button>
+            <button onclick="cancelarExclusao()">Cancelar</button>
+        </div>
+    </div>
+    
+    <script>
+        let contas = [];
+        let caixa = 0;
+        let totalInvestido = 0;
+        let historico = [];
+        let contaExcluirIndex = -1;
+        let nomeUsuario = localStorage.getItem('nomeUsuario');
+    
+        // Função para exibir a aba correta
+        function mostrarAba(id) {
+            document.querySelectorAll('.content').forEach((aba) => {
+                aba.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach((tab) => {
+                tab.classList.remove('active');
+            });
+    
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+            atualizarUI();
+        }
+    
+        // Função para salvar o nome do usuário
+        function salvarNome() {
+            nomeUsuario = document.getElementById('nome-usuario').value;
+            if (nomeUsuario) {
+                localStorage.setItem('nomeUsuario', nomeUsuario);
+                document.getElementById('campo-nome').style.display = 'none';
+                document.getElementById('titulo-menu').innerText = `Olá, ${nomeUsuario}`;
+                document.getElementById('info-usuario').style.display = 'block';
+                atualizarUI();
+            }
+        }
+    
+        // Função para atualizar todas as interfaces
+        function atualizarUI() {
+            const hoje = new Date();
+            const tabela = document.getElementById('tabela-contas');
+            tabela.innerHTML = contas.map((c, i) => {
+                let status = c.paga ? 'Paga' : hoje > c.vencimento ? 'Vencida' : 'Pendente';
+                let classeStatus = c.paga ? 'paga' : hoje > c.vencimento ? 'vencida' : 'pendente';
+    
+                return `
+                    <tr>
+                        <td>${c.nome}</td>
+                        <td>R$ ${c.valor.toFixed(2)}</td>
+                        <td>${c.vencimento}</td>
+                        <td class="${classeStatus}">${status}</td>
+                        <td>
+                            <button class="btn-pagar" onclick="marcarComoPaga(${i})">Pagar</button>
+                            <button class="btn-deletar" onclick="excluirConta(${i})">Excluir</button>
+                        </td>
+                    </tr>`; 
+            }).join('');
+    
+            // Atualizando os valores na aba Menu
+            document.getElementById('caixa-valor-menu').innerText = caixa.toFixed(2);
+            document.getElementById('total-investido-menu').innerText = totalInvestido.toFixed(2);
+    
+            document.getElementById('contas-pendentes').innerText = contas.filter(c => !c.paga).length;
+            document.getElementById('contas-pagas').innerText = contas.filter(c => c.paga).length;
+    
+            atualizarHistorico();
+            atualizarCaixaEInvestimentos();
+        }
+    
+        // Função para excluir conta
+        function excluirConta(index) {
+            contaExcluirIndex = index;
+            document.getElementById('modal-exclusao').style.display = 'flex';
+        }
+    
+        // Confirmar exclusão
+        function confirmarExclusao() {
+            if (contaExcluirIndex >= 0) {
+                contas.splice(contaExcluirIndex, 1);
+                atualizarUI();
+            }
+            cancelarExclusao();
+        }
+    
+        // Cancelar exclusão
+        function cancelarExclusao() {
+            contaExcluirIndex = -1;
+            document.getElementById('modal-exclusao').style.display = 'none';
+        }
+    
+        // Função para marcar a conta como paga
+        function marcarComoPaga(index) {
+            const conta = contas[index];
+            if (conta.paga) return;
+    
+            caixa -= conta.valor;
+            conta.paga = true;
+    
+            historico.push({
+                data: new Date().toLocaleString(), // Adicionando data e hora
+                movimentacao: `Pagamento de conta: ${conta.nome}`,
+                valor: `-R$ ${conta.valor.toFixed(2)}`,
+                caixaDepois: caixa.toFixed(2)
+            });
+    
+            atualizarUI();
+        }
+    
+        // Adicionar caixa
+        function adicionarCaixa() {
+            const valor = parseFloat(document.getElementById('valor-caixa').value);
+            if (isNaN(valor)) return;
+
+            caixa += valor;
+
+            // Adicionar no histórico
+            historico.push({
+                data: new Date().toLocaleString(), // Adicionando data e hora
+                movimentacao: 'Adição ao caixa',
+                valor: `+R$ ${valor.toFixed(2)}`,
+                caixaDepois: caixa.toFixed(2)
+            });
+
+            atualizarUI();
+        }
+            
+        // Adicionar investimento
+        function adicionarInvestimento() {
+            const valor = parseFloat(document.getElementById('valor-investir').value);
+            if (isNaN(valor) || valor <= 0) return;
+    
+            totalInvestido += valor;
+            caixa -= valor;
+    
+            historico.push({
+                data: new Date().toLocaleString(), // Adicionando data e hora
+                movimentacao: 'Investimento realizado',
+                valor: `-R$ ${valor.toFixed(2)}`,
+                caixaDepois: caixa.toFixed(2)
+            });
+    
+            atualizarUI();
+        }
+    
+        // Retirar investimento
+        function retirarInvestimento() {
+            const valor = parseFloat(document.getElementById('valor-investir').value);
+            if (isNaN(valor) || valor <= 0 || valor > totalInvestido) return;
+    
+            totalInvestido -= valor;
+            caixa += valor;
+    
+            historico.push({
+                data: new Date().toLocaleString(), // Adicionando data e hora
+                movimentacao: 'Resgate de investimento',
+                valor: `+R$ ${valor.toFixed(2)}`,
+                caixaDepois: caixa.toFixed(2)
+            });
+    
+            atualizarUI();
+        }
+    
+        // Adicionar conta
+        function adicionarConta() {
+            const nome = document.getElementById('nome-conta').value;
+            const valor = parseFloat(document.getElementById('valor-conta').value);
+            const vencimento = document.getElementById('vencimento-conta').value;
+    
+            if (!nome || isNaN(valor) || !vencimento) return;
+    
+            contas.push({
+                nome: nome,
+                valor: valor,
+                vencimento: vencimento,
+                paga: false
+            });
+    
+            atualizarUI();
+        }
+    
+        // Atualizar histórico de movimentações
+        function atualizarHistorico() {
+            const tabelaHistorico = document.getElementById('tabela-historico');
+            tabelaHistorico.innerHTML = historico.map(h => {
+                return `
+                    <tr>
+                        <td>${h.data}</td>
+                        <td>${h.movimentacao}</td>
+                        <td>${h.valor}</td>
+                        <td>${h.caixaDepois}</td>
+                    </tr>`;
+            }).join('');
+        }
+    
+        // Atualizar os valores de Caixa e Investimentos nas abas Caixa e Investimentos
+        function atualizarCaixaEInvestimentos() {
+            // Caixa na aba caixa
+            document.getElementById('caixa-valor-caixa').innerText = caixa.toFixed(2);
+            
+            // Investimentos na aba Investimentos
+            document.getElementById('total-investido-investimentos').innerText = totalInvestido.toFixed(2);
+        }
+    
+        // Exibir tela de Adicionar fundos
+        function exibirTelaAdicionar() {
+            document.getElementById('modal-adicionar-fundos').style.display = 'block';
+        }
+    
+        // Exibir tela de Retirar fundos
+        function exibirTelaRetirar() {
+            document.getElementById('modal-retirar-fundos').style.display = 'block';
+        }
+    
+        // Fechar modal
+        function fecharModal() {
+            document.getElementById('modal-adicionar-fundos').style.display = 'none';
+            document.getElementById('modal-retirar-fundos').style.display = 'none';
+        }
+    
+        // Adicionar fundos ao caixa
+        function adicionarFundos() {
+            const valor = parseFloat(document.getElementById('valor-adicionar').value);
+            if (isNaN(valor) || valor <= 0) return;
+            caixa += valor;
+
+            // Adicionar no histórico
+            historico.push({
+                data: new Date().toLocaleString(), // Adicionando data e hora
+                movimentacao: 'Adição ao caixa',
+                valor: `+R$ ${valor.toFixed(2)}`,
+                caixaDepois: caixa.toFixed(2)
+            });
+
+            fecharModal();
+            atualizarUI();
+        }
+
+        // Retirar fundos (no modal)
+        function retirarFundos() {
+            const valor = parseFloat(document.getElementById('valor-retirar').value);
+            if (isNaN(valor) || valor <= 0 || valor > caixa) return;
+            caixa -= valor;
+
+            // Adicionar no histórico
+            historico.push({
+                data: new Date().toLocaleString(), // Adicionando data e hora
+                movimentacao: 'Retirada do caixa',
+                valor: `-R$ ${valor.toFixed(2)}`,
+                caixaDepois: caixa.toFixed(2)
+            });
+
+            fecharModal();
+            atualizarUI();
+        }
+    
+        // Iniciar com o nome do usuário se já estiver salvo
+        if (nomeUsuario) {
+            document.getElementById('titulo-menu').innerText = `Olá, ${nomeUsuario}`;
+            document.getElementById('info-usuario').style.display = 'block';
+        } else {
+            document.getElementById('campo-nome').style.display = 'block';
+        }
+    </script>
+    
+    </body>
+</html>
